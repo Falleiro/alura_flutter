@@ -4,10 +4,17 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // This widget is the root of your application.
+  @override
+  bool opacidade = true;
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
@@ -16,36 +23,68 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(
-          leading: Container(),
-          title: Text('Tarefas'),
+          title: const Text('Flutter: Primeiros Passos'),
+          leading: Icon(Icons.add_task),
         ),
-        body: ListView(
-          children: [
-            Task('Aprendendo Flutter'),
-            Task('Andar de bike'),
-            Task('Meditar'),
-            Task('Meditar'),
-            Task('Meditar'),
-            Task('Meditar'),
-            Task('Meditar'),
-          ],
+        body: AnimatedOpacity(
+          opacity: opacidade ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 500),
+          child: Container(
+            color: Color.fromARGB(255, 208, 221, 237),
+            child: ListView(
+              children: const [
+                Padding(
+                  //aula 5.4
+                  padding: EdgeInsets.only(top: 8),
+                  child:
+                      Tasks('Estudar Flutter', 'assets/images/flutter.png', 3),
+                ),
+                Tasks('Andar de Bike', 'assets/images/bike.png', 2),
+                Tasks('Ler 50 páginas', 'assets/images/livro.png', 1),
+                Tasks('Meditar', 'assets/images/meditar.png', 4),
+                Tasks('Jogar', 'assets/images/game.png', 0),
+                SizedBox(
+                  height: 100,
+                ),
+              ],
+            ),
+          ),
         ),
-        // floatingActionButton: FloatingActionButton(onPressed: () {}),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              opacidade = !opacidade;
+            });
+          },
+          backgroundColor: Colors.blue[100],
+          child: const Icon(Icons.remove_red_eye),
+        ),
       ),
     );
   }
 }
 
-class Task extends StatefulWidget {
+class Tasks extends StatefulWidget {
   final String nome;
-  const Task(this.nome, {super.key});
+  final String foto;
+  final int dificuldade;
+
+  const Tasks(this.nome, this.foto, this.dificuldade, {Key? key})
+      : super(key: key);
 
   @override
-  State<Task> createState() => _TaskState();
+  State<Tasks> createState() => _TasksState();
 }
 
-class _TaskState extends State<Task> {
-  int nivel = 0;
+class _TasksState extends State<Tasks> {
+  int level = 1;
+
+  void levelUp() {
+    setState(() {
+      level++;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -54,51 +93,75 @@ class _TaskState extends State<Task> {
         child: Stack(
           children: [
             Container(
-              color: Colors.blue,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                color: Colors.blue,
+              ),
               height: 140,
             ),
             Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  color: Colors.white,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: Colors.white,
+                  ),
                   height: 100,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                        color: Colors.black26,
-                        width: 72,
-                        height: 100,
-                      ),
-                      Container(
-                        width: 200,
-                        child: Text(
-                          widget.nome,
-                          style: TextStyle(
-                            fontSize: 24,
-                            overflow: TextOverflow.fade,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          color: Colors.black12,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Image.asset(
+                            widget.foto,
+                            height: 100,
+                            width: 72,
+                            fit: BoxFit.cover,
                           ),
                         ),
                       ),
-                      Container(
-                        height: 52,
-                        width: 52,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              nivel++;
-                            });
-                          },
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Icon(Icons.arrow_drop_up),
-                              Text(
-                                'UP',
-                                style: TextStyle(fontSize: 12),
-                              )
-                            ],
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 200,
+                            child: Text(
+                              widget.nome,
+                              style: const TextStyle(
+                                  fontSize: 24,
+                                  overflow: TextOverflow.ellipsis),
+                            ),
+                          ),
+                          Difficulty(widget.dificuldade),
+                          // vai ser um novo componente.
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Container(
+                          height: 52,
+                          width: 52,
+                          child: ElevatedButton(
+                            onPressed: levelUp,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: const [
+                                Icon(Icons.arrow_drop_up),
+                                Text(
+                                  'UP',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       )
@@ -109,28 +172,64 @@ class _TaskState extends State<Task> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.only(
+                        left: 8,
+                      ),
                       child: Container(
+                        width: 200,
                         child: LinearProgressIndicator(
                           color: Colors.white,
-                          value: nivel / 10,
+                          value: widget.dificuldade > 0
+                              ? ((level / widget.dificuldade) / 10)
+                              : 1,
                         ),
-                        width: 279,
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(12.0),
                       child: Text(
-                        'Nivel:  $nivel',
+                        'Nivel: $level',
                         style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ),
                   ],
-                ),
+                )
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class Difficulty extends StatelessWidget {
+  final int dificulty;
+
+  const Difficulty(this.dificulty, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      //aula 5.4
+      child: Row(
+        children: [
+          Icon(Icons.star,
+              size: 15,
+              color: (dificulty >= 1) ? Colors.blue : Colors.blue[100]),
+          Icon(Icons.star,
+              size: 15,
+              color: (dificulty >= 2) ? Colors.blue : Colors.blue[100]),
+          Icon(Icons.star,
+              size: 15,
+              color: (dificulty >= 3) ? Colors.blue : Colors.blue[100]),
+          Icon(Icons.star,
+              size: 15,
+              color: (dificulty >= 4) ? Colors.blue : Colors.blue[100]),
+          Icon(Icons.star,
+              size: 15,
+              color: (dificulty >= 5) ? Colors.blue : Colors.blue[100]),
+        ],
       ),
     );
   }
