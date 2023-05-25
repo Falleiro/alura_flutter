@@ -16,6 +16,13 @@ class Tasks extends StatefulWidget {
 class _TasksState extends State<Tasks> {
   int level = 1;
 
+  bool assetOrNetwork() {
+    if (widget.foto.contains('http')) {
+      return false;
+    }
+    return true;
+  }
+
   void levelUp() {
     setState(() {
       level++;
@@ -55,14 +62,18 @@ class _TasksState extends State<Tasks> {
                           color: Colors.black12,
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: Image.asset(
-                            widget.foto,
-                            height: 100,
-                            width: 72,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                            borderRadius: BorderRadius.circular(4),
+                            child: assetOrNetwork()
+                                ? Image.asset(
+                                    widget.foto,
+                                    height: 100,
+                                    width: 72,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.network(
+                                    widget.foto,
+                                    fit: BoxFit.cover,
+                                  )),
                       ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -77,7 +88,7 @@ class _TasksState extends State<Tasks> {
                                   overflow: TextOverflow.ellipsis),
                             ),
                           ),
-                          Difficulty(widget.dificuldade),
+                          Difficulty(dificultyLevel: widget.dificuldade),
                           // vai ser um novo componente.
                         ],
                       ),
@@ -88,10 +99,10 @@ class _TasksState extends State<Tasks> {
                           width: 52,
                           child: ElevatedButton(
                             onPressed: levelUp,
-                            child: Column(
+                            child: const Column(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.end,
-                              children: const [
+                              children: [
                                 Icon(Icons.arrow_drop_up),
                                 Text(
                                   'UP',
